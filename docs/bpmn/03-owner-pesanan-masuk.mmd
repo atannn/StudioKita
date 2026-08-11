@@ -1,0 +1,34 @@
+﻿flowchart LR
+  subgraph O["Lane: Pemilik Studio"]
+    O1([Mulai: Notifikasi pesanan masuk])
+    O2[Buka menu Booking]
+    O3[Lihat detail pesanan]
+    O4[Konfirmasi pesanan]
+    O5[Batalkan pesanan]
+    O6[Tandai sesi selesai]
+    O7([Selesai])
+  end
+
+  subgraph S["Lane: Sistem"]
+    S1[Buat booking baru<br/>status menunggu pembayaran]
+    S2[Kirim notifikasi ke owner]
+    S3[Tampilkan detail booking + status bayar]
+    S4[Monitor callback Midtrans]
+    S5{Status pembayaran}
+    S6[Tetap menunggu pembayaran]
+    S7[Set menunggu pelunasan DP<br/>batas 15 menit sebelum selesai]
+    S8{Lewat batas pelunasan?}
+    S9[Set failed atau expired<br/>release slot]
+    S10[Izinkan owner konfirmasi]
+    S11[Update booking confirmed<br/>lock slot jadwal]
+    S12[Update booking cancelled<br/>release slot]
+    S13[Update booking selesai<br/>catat pemasukan]
+  end
+
+  S1 --> S2 --> O1 --> O2 --> S3 --> O3 --> S4 --> S5
+  S5 -- unpaid --> S6 --> S4
+  S5 -- partial DP --> S7 --> S8
+  S8 -- Tidak --> S4
+  S8 -- Ya --> S9 --> O7
+  S5 -- paid lunas --> S10 --> O4 --> S11 --> O6 --> S13 --> O7
+  O5 --> S12 --> O7

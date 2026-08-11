@@ -1,0 +1,38 @@
+﻿flowchart LR
+  subgraph O["Lane: Pemilik Studio"]
+    O1([Mulai])
+    O2[Buka halaman login/register]
+    O3{Sudah punya akun?}
+    O4[Isi form registrasi owner]
+    O5[Login]
+    O6[Pilih buat tenant baru]
+    O7[Isi setup tenant<br/>profil, lokasi, jam operasional]
+    O8[Masuk dashboard tenant]
+    O9([Selesai])
+  end
+
+  subgraph S["Lane: Sistem"]
+    S1[Tampilkan form login/register]
+    S2[Validasi data registrasi]
+    S3[Simpan user owner]
+    S4[Validasi login]
+    S5{Login valid?}
+    S6[Ambil data tenant milik owner]
+    S7{Tenant sudah ada?}
+    S8[Validasi data setup tenant]
+    S9[Insert tenants DB pusat<br/>status inactive]
+    S10[Insert tenant_databases<br/>buat file DB tenant]
+    S11[Run migrasi tenant<br/>seed tenant_profiles]
+    S12[Set relasi owner ke tenant]
+    S13[Tampilkan dashboard owner]
+    S14[Tampilkan pesan error]
+  end
+
+  O1 --> O2 --> S1 --> O3
+  O3 -- Tidak --> O4 --> S2 --> S3 --> O5
+  O3 -- Ya --> O5
+  O5 --> S4 --> S5
+  S5 -- Tidak --> S14 --> O2
+  S5 -- Ya --> S6 --> S7
+  S7 -- Ya --> S13 --> O8 --> O9
+  S7 -- Tidak --> O6 --> O7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> O8 --> O9

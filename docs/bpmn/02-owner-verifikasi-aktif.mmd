@@ -1,0 +1,38 @@
+﻿flowchart LR
+  subgraph O["Lane: Pemilik Studio"]
+    O1([Mulai])
+    O2[Buka menu Verifikasi]
+    O3[Kirim OTP email]
+    O4[Input kode OTP]
+    O5[Upload dokumen verifikasi]
+    O6[Submit verifikasi Level 2]
+    O7[Perbaiki dokumen]
+    O8[Set status studio ke Active]
+    O9([Selesai])
+  end
+
+  subgraph S["Lane: Sistem"]
+    S1[Tampilkan status verifikasi]
+    S2[Generate OTP + kirim email]
+    S3[Validasi OTP]
+    S4{OTP valid?}
+    S5[Set basic_verified]
+    S6[Validasi file dokumen]
+    S7[Simpan tenant_verification_documents]
+    S8[Set verification_status pending]
+    S9[Review manual oleh developer]
+    S10{Hasil review?}
+    S11[Set rejected + catatan]
+    S12[Set verified level 2]
+    S13{Syarat aktif terpenuhi?<br/>Level 2 + Midtrans tersimpan<br/>aktif + test koneksi sukses}
+    S14[Update tenants.status active]
+    S15[Tolak aktivasi<br/>tetap inactive]
+  end
+
+  O1 --> O2 --> S1 --> O3 --> S2 --> O4 --> S3 --> S4
+  S4 -- Tidak --> O4
+  S4 -- Ya --> S5 --> O5 --> S6 --> S7 --> O6 --> S8 --> S9 --> S10
+  S10 -- Rejected --> S11 --> O7 --> O5
+  S10 -- Approved --> S12 --> O8 --> S13
+  S13 -- Ya --> S14 --> O9
+  S13 -- Tidak --> S15 --> O8
